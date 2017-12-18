@@ -194,9 +194,36 @@ guard (조건문) else {
 ## 클래스
 
 - 참조 타입 : 함수 내부에서 인스턴스를 참조하여 사용
+- `final` 키워드를 사용하여 상속이 불가능하게 한다
+- `super`, `override`
 - `deinit` : 디이니셜라이저 (소멸자)
+- `class func`은 `static func`와 유사하지만, `class func`는 `override`가능
+- 초기화 단계
+  1. 저장 프로퍼티에 초기값 할당
+     1. 이니셜라이저 호출
+     2. 메모리 할당
+     3. 저장 프로퍼티 초기화
+     4. 부모 클래스에게 초기화 양도
+     5. 상속 체이닝(4번 반복)
+  2. 저장 프로퍼티들을 사용자 정의할 기회를 얻는다
+     1. 지정 인스턴스 사용자 정의
+     2. 편의 인스턴스 사용자 정의
 
-> A === B : A와 B가 참조 타입일 때, 같은 인스턴스를 가리키는 지 비교
+> `A === B` : A와 B가 참조 타입일 때, 같은 인스턴스를 가리키는 지 비교
+
+## 상속
+
+- 프로퍼티 재정의
+  - 상수 저장(`let`), 읽기전용(`set`)은 재정의할 수 없다
+  - 프로퍼티 감시자(`didset`, `willset`)을 재정의하여도 **조상클래스의 프로퍼티 감시자도 동작**한다
+- 서브스크립트 재정의
+  - 부모클래스 서브스크립트의 **매개변수와 반환 타입이 같아**야한다
+- `final` 키워드를 사용하여 재정의를 방지한다
+- 이니셜라이저
+  - **지정 이니셜라이저(Designated Initializer)**
+    - **자식 클래스의 Designated** 는 **부모 클래스의 Designated** 를 반드시 **호출**해야한다
+  - **편의 이니셜라이저(Convenience Initializer)**
+    - **다른 이니셜라이저**를 반드시 **호출**해야한다
 
 ## 프로퍼티
 
@@ -415,3 +442,33 @@ protocol Container{
 }
 ```
 
+## 모나드
+
+- **함수객체**의 일종. 맵함수를 지원하는 **컨테이너** 타입. **값이 있을지 없을지 모르는 상태**를 추가한다 (옵셔널)
+
+
+- **Contents**를 감싸는 **Context**
+
+```Swift
+addFunction(number: Optional(10)) //  Error
+print(Optional(2).map(addFunction)) //Optional(12)
+```
+
+- `flatMap` : 컨테이너 내부의 값을 가져온다
+
+```swift
+let optionalArr: [Int?] = [1, 2, nil, 4]
+print( optionalArr.map({$0}) ) //Optional(1), Optional(2), nil, Optional(4)]
+print( optionalArr.flatMap({$0}) ) //[1, 2, 4]
+```
+
+## 서브스크립트
+
+- **타입의 구현부** 혹은 **타입의 익스텐션 구현부**에 위치해야한다
+
+```Swift
+subscript(index: Int) -> Int {
+  get{ ... }
+  set(newValue){ ... }
+}
+```
