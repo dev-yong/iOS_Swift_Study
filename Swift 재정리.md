@@ -225,6 +225,7 @@ guard (조건문) else {
     - **자식 클래스의 Designated** 는 **부모 클래스의 Designated** 를 반드시 **호출**해야한다
   - **편의 이니셜라이저(Convenience Initializer)**
     - **다른 이니셜라이저**를 반드시 **호출**해야한다
+    - `extension`에 추가 가능하다
   - 부모가 실패한 이니셜라이저라도, 자식은 기본 이니셜라이저가 가능하다
 
 ## 프로퍼티
@@ -476,6 +477,7 @@ subscript(index: Int) -> Int {
 ```
 ## 타입캐스팅
 
+- `is` : 데이터 타입 확인
 - 어떠한 타입으로 다루고 접근해야 할 지 판단할 수 있도록 도와주는 행동
 - **다운캐스팅**
   - `as?` : 다운캐스팅 실패 시 `nil` 반환
@@ -484,3 +486,13 @@ subscript(index: Int) -> Int {
   - `SomeClass.Type` , `SomeProtocol.Protocol`
   - `Instance.self` : 인스턴스 그 자체
   - `SomeType.self` : SomeType
+
+## 익스텐션
+
+- 값 타입 `extension`에 이니셜라이저 추가
+  - 모든 저장 프로터피에 기본값이 존재
+  - 추가 사용자저으이 이니셜라이저가 없는 경우
+
+
+- `class`의 `extension`에 이니셜라이저 추가
+  - `convenience`만 가능
