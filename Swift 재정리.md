@@ -197,7 +197,7 @@ guard (조건문) else {
 - `final` 키워드를 사용하여 상속이 불가능하게 한다
 - `super`, `override`
 - `deinit` : 디이니셜라이저 (소멸자)
-- `required` : 반드시 재정의 해줘야하는 이니셜라이저의 키워드
+- `required` : 반드시 자식 클래스에서 재정의 해줘야하는 이니셜라이저의 키워드
 - `class func`은 `static func`와 유사하지만, `class func`는 `override`가능
 - 초기화 단계
   1. 저장 프로퍼티에 초기값 할당
@@ -474,3 +474,13 @@ subscript(index: Int) -> Int {
   set(newValue){ ... }
 }
 ```
+## 타입캐스팅
+
+- 어떠한 타입으로 다루고 접근해야 할 지 판단할 수 있도록 도와주는 행동
+- **다운캐스팅**
+  - `as?` : 다운캐스팅 실패 시 `nil` 반환
+  - `as!` : 다운캐스팅 실패 시 런타임 오류
+- **메타타입** : ''어떠한 타입''의 타입
+  - `SomeClass.Type` , `SomeProtocol.Protocol`
+  - `Instance.self` : 인스턴스 그 자체
+  - `SomeType.self` : SomeType
