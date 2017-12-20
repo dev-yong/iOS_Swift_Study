@@ -496,3 +496,114 @@ subscript(index: Int) -> Int {
 
 - `class`의 `extension`에 이니셜라이저 추가
   - `convenience`만 가능
+
+## 타입 중첩
+
+```swift
+class Student {
+  enum School {
+    case elementary, middle, high
+  }
+  var school: School 
+  init(school: School){
+  	self.school = school
+  	super.init()
+  }
+}
+```
+
+## 패턴
+
+- 값을 추출 혹은 무시하는 패턴 : 와일드카드, 식별자, 값 바인딩, 튜플 패턴
+
+  - 와일드카드
+
+  ```Swift
+  switch value {
+    case _ : break //모든 값 허용
+  }
+
+  switch optionalString {
+    case "ABC"? : print("Optional Value")
+    case _? : print("Not ABC")
+    case nil: print("Nil")
+  }
+
+  switch tuple{
+    case ("name", _, _) : break
+    case (_, _, _) : break
+  }
+  ```
+
+- 패턴 매칭을 위한 패턴 : 열거형 케이스, 옵셔널, 표현, 타입캐스팅
+
+  - 옵셔널 패턴
+
+  ```swift
+  var optionalValue: Int? = 100
+  if case .some(let value) = optionalValue {
+    print(value)
+  }
+  ```
+
+  - 타입캐스팅 패턴
+
+  ```Swift
+  switch someValue {
+    case is String: print("String")
+    case let value as Int: Pirnt("Int")
+    default : break
+  }
+  ```
+
+  - 표현 패턴 : `switch case`문에서만 사용 가능
+
+  ```Swift
+  func ~=(pattern: String, value: Int) -> Bool {
+      return pattern == "\(value)"
+  }
+
+  point = (0,0)
+  switch point {
+  case ("0", "0"):
+      print("원점")
+  default:
+      print("원점 외")
+  }
+  ```
+
+  ```swift
+  protocol Personalize {
+      var name: String {get}
+      var age: Int {get}
+  }
+
+  struct Person: Personalize {
+      var name: String
+      var age: Int
+  }
+
+  let person: Person = Person(name: "Name", age: 25)
+
+  func ~=<T: Personalize>(pattern: String, value: T) -> Bool {
+      //case "Name"
+      return pattern == value.name
+  }
+
+  func ~=<T: Personalize>(pattern: T, value: T) -> Bool {
+      //case Person(name: "Name", age: 25)
+      return pattern.name == value.name && pattern.age == value.age
+  }
+
+  func ~=<T: Personalize>(pattern: (T)->Bool, value: T) -> Bool {
+      //pattern이 함수형식
+      return pattern(value)
+  }
+  func young<T: Personalize>(value: T) -> Bool {
+    	//위 패턴과 함게 사용하여 case young : 
+      return value.age <50
+  }
+  ```
+
+  ​
+
