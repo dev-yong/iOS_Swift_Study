@@ -14,7 +14,7 @@ person.age
 person.height
 ```
 
-Array는 통상적으로 알고 있는 List와 유사하다.
+- `defer` : 꼭 실행해야하는 마무리 자업
 
 ## Set
 
@@ -248,6 +248,24 @@ let pos = Position(y: 10.0)
 print(pos.x) //이 때 프로퍼티 x가 생성
 ```
 
+```swift
+class Perons{
+    let name: String
+    let hobby: String?
+    
+  //lazy 키워드가 없으면 self.name 접근이 불가능
+    lazy var introduce: () -> String = {
+        var introduction: String = "My name is \(self.name)"
+        return introduction
+    }
+    
+    init(name: String, hobby: String? = nil) {
+        self.name = name
+        self.hobby = hobby
+    }
+}
+```
+
 - 함수를 사용한 프로퍼티의 기본값 : **클로저**를 사용
 
 ```Swift
@@ -290,6 +308,7 @@ struct LevelStruct {
 ## Closure
 
 - 클로저는 참조 타입이다
+- 자신 내부의 참조들을 사용할 수 있도록 참조 횟수를 증가시켜 메모리에서 해제된느 것을 방지한다
 - `@noescaping` : 함수가 끝난 후 전달된 클로저가 필요 없을 때 사용
 - `@escaping`은 클로저 파라미터를 함수 외부에서도 사용할 수 있게 해준다
 - `@autocloure` : 전달인자를 갖지 않는다. 클로저가 호출되기 전까지 클로저가 동작하지 않는다. 연산의 지연
@@ -334,6 +353,14 @@ let result: [String] = value.sorted(){
     $0 > $1
 }
 ```
+
+- 획득목록
+
+```
+
+```
+
+
 
 ## 프로토콜
 
@@ -605,5 +632,109 @@ class Student {
   }
   ```
 
-  ​
+## Where 절
 
+- 패턴에 추가 시 **조건을 추가**시킬 수 있다
+
+```swift
+switch value {
+  case let value where value < 10 : ...
+  case let value where is String : ...
+}
+```
+
+- 타입에 추가 시 **제약을 추가**시킬 수 있다
+
+```Swift
+protocol Printable{
+}
+extension Printable where Self:BinaryInteger, Self: Comparable{
+ 	print("BinaryInteger와 Comparable을 준수")
+}
+```
+
+```swift
+func doubled<T>(integerValue: T) -> T where T: BinaryInteger {
+}
+```
+
+## ARC
+
+- **메모리 관리 기법**으로, **클래스의 인스턴스**에만 적용
+- **컴파일 시**에 **Reference Counting** 실시 및 인스턴스 메모리 해제 시점 결정
+
+
+- 강한 참조
+  - 참조의 기본은 강한 참조이다
+  - 인스턴스가 참조될 때마다 카운팅이 증가하며, nil을 할당해주면 카운팅이 감소한다
+  - 순환 문제 (459p 다시 읽기)
+- 약한 참조 `weak`
+  - 참조하는 인스턴스의 참조 횟수를 증가시키지 않는다
+  - 항상 옵셔널이어야한다
+- 미소유 참조 `unowned` 
+  - 참조하는 인스턴스가 항상 메모리에 존재할 것이라는 전제를 기반
+  - 인스턴스의 참조 횟수를 증가시키지 않는다
+  - 잘못 접근 시 런타임 오류 발생
+
+```swift
+class Person {
+    let name: String
+    let hobby: String?
+    init(name: String, hobby: String? = nil){
+        self.name = name
+        self.hobby = hobby
+    }
+    lazy var introduce: () -> String = { [weak self] in
+        guard let 'self' = self else {return "Missing Instance"}
+        var introduction: String = "My name is \(self.name)"
+        return introduction
+    }
+}
+```
+
+## 오류처리
+
+```swift
+enum VendingMachineError: Error {
+    case invalidSelection
+    case insufficientFunds(coinsNeeded: Int)
+    case outOfStock
+}
+
+class VendingMachine {
+    func vend(name: String) throws {
+        throw VendingMachineError.invalidSelection
+    }
+    func buy(name: String) throws {
+        try vend(name: name)
+      //try? vend(name: name) : nil 반환
+    }
+}
+```
+
+## 자주 사용하는 함수
+
+```swift
+print(abs(-100)) //절대값
+for item in repeatElement(0, count: 5) {
+    //repeatElement(0, count: 5) : 0 Element를 5번 반복
+    print(item)
+}
+max(1,2,3,4)
+min(1,2,3,4)
+print(1,2,3,4, separator: ", ", terminator: "") // 1,2,3,4
+
+var value1 = 100
+var value2 = 200
+swap(&value1, &value2)
+print(value1, value2)
+
+let words = ["하나", "둘", "셋"]
+let numbers = 1...3
+print(Array(zip(words, numbers)))
+```
+
+## @objc
+
+- `@objc` 속성이 부여된 프로토콜은 `@objc` 속성이 부여되지 않은 프로토콜을 상속받을 수 없다
+- `@objc` 속성이 부여된 프로토콜을 상속받는 프로토콜은  `@objc` 속성이 부여된다
