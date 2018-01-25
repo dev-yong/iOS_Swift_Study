@@ -223,9 +223,32 @@ guard (조건문) else {
 - 이니셜라이저 (책 320p 잘 모르겟다.. 계속 봐야지 ㅠ)
   - **지정 이니셜라이저(Designated Initializer)**
     - **자식 클래스의 Designated** 는 **부모 클래스의 Designated** 를 반드시 **호출**해야한다
+
   - **편의 이니셜라이저(Convenience Initializer)**
     - **다른 이니셜라이저**를 반드시 **호출**해야한다
+    - 다른 이니셜라이저에 대한 **편의성 제공**
     - `extension`에 추가 가능하다
+
+    ```swift
+    class Person {
+
+        var name: String
+        var age: Int
+        var gender: String
+        init(name: String, age: Int, gender: String) {
+            self.name = name
+            self.age = age
+            self.gender = gender
+        }
+
+        convenience init(age: Int, gender: String) {
+            self.init(name: "zedd", age: age, gender: gender)
+        }
+    }
+    ```
+
+    ​
+
   - 부모가 실패한 이니셜라이저라도, 자식은 기본 이니셜라이저가 가능하다
 
 ## 프로퍼티
