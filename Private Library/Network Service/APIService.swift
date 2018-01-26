@@ -1,44 +1,38 @@
 import Foundation
 import Alamofire
 
-protocol APIService{
+enum Result<T> {
+    case Success(T)
+    case Failure(Int)
+}
+struct Token {
+    static func getToken() -> [String:String]{
+        guard let token = UserDefaults.standard.string(forKey: "token") else {return ["tt" : "Not exist Token"]}
+        print(token)
+        return ["token" : token]
+    }
+}
+protocol APIService {
     
 }
 
-
-extension APIService{
-    
-    static func getURL(_ path: String) -> String {
-        return "http://INPUT_URL/" + path
+extension APIService  {
+    static func getURL(path: String) -> String {
+        return "http://YOUR_URL/" + path
     }
-    static func getStatusCodeAndResult(response: DataResponse<Data>) -> [String:Any?]?
-    {
+    static func getResult_StatusCode(response: DataResponse<Data>) -> Result<Any>? {
         switch response.result {
         case .success :
-            guard let statusCode = response.response?.statusCode 
-                else {
-                    print("Status Code Error is occurred")
-                    return nil
+            guard let statusCode = response.response?.statusCode as Int? else {return nil}
+            guard let responseData = response.data else {return nil}
+            switch statusCode {
+            case 200..<400 :
+                return Result.Success(responseData)
+            default :
+                return Result.Failure(statusCode)
             }
-            guard let responseData = response.data
-                else {
-                    print("Response Data Error is occurred")
-                    return nil
-            }
-            var resultStatusData:[String: Any?] = ["code": statusCode,
-                                                   "data": nil]
-            switch Int(statusCode)
-            {
-            case 200..<400:
-                resultStatusData["data"] = responseData
-                break
-            default:
-                break
-            }
-            return resultStatusData
         case .failure(let err) :
             print(err.localizedDescription)
-            break
         }
         return nil
     }
