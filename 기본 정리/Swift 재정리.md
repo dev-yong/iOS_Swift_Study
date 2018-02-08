@@ -333,7 +333,16 @@ struct LevelStruct {
 - 클로저는 참조 타입이다
 - 자신 내부의 참조들을 사용할 수 있도록 참조 횟수를 증가시켜 메모리에서 해제된느 것을 방지한다
 - `@noescaping` : 함수가 끝난 후 전달된 클로저가 필요 없을 때 사용
-- `@escaping`은 클로저 파라미터를 함수 외부에서도 사용할 수 있게 해준다
+- `@escaping` :  클로저 파라미터를 함수 외부에서도 사용할 수 있게 해준다 
+
+```swift
+func closure(_ arg: @escaping ()->()) {
+  self.prop = arg
+}
+```
+
+
+
 - `@autocloure` : 전달인자를 갖지 않는다. 클로저가 호출되기 전까지 클로저가 동작하지 않는다. 연산의 지연
   `@autoclosure`는 `@noescaping`이 기본값이다
   `@autoclosure @escaping`
@@ -342,7 +351,8 @@ struct LevelStruct {
 func serveCustomer(customerProvider: @autoclosure () -> String){
   print(customerProvider)
 }
-serveCustomer(customerProvider: customer.removeFirst())
+//serveCustomer({customer.removeFirst()}) 일반 closure
+serveCustomer(customer.removeFirst())
 // autoclosure 키워드가 있어 customer.removeFirst() 클로저의 연산 값 String이 인자로 전달된다
 ```
 
@@ -683,7 +693,11 @@ func doubled<T>(integerValue: T) -> T where T: BinaryInteger {
 
 ## ARC
 
-- **메모리 관리 기법**으로, **클래스의 인스턴스**에만 적용
+- *메모리 관리 기법*으로, **클래스의 인스턴스**에만 적용
+
+
+> 구조체나 열거형은 value type 이므로, ARC와 무관
+
 - **컴파일 시**에 **Reference Counting** 실시 및 인스턴스 메모리 해제 시점 결정
 
 
@@ -761,3 +775,181 @@ print(Array(zip(words, numbers)))
 
 - `@objc` 속성이 부여된 프로토콜은 `@objc` 속성이 부여되지 않은 프로토콜을 상속받을 수 없다
 - `@objc` 속성이 부여된 프로토콜을 상속받는 프로토콜은  `@objc` 속성이 부여된다
+
+
+
+# 2017.02.08
+
+## 접근 수준
+
+- ##### 상위 요소보다 하위 요소가 더 높은 접근수준을 가질 수 없다.
+
+| 키워드         | 범위       | 특징                                       |
+| ----------- | -------- | ---------------------------------------- |
+| open        | 모듈 외부    | 상속 가능.  `open class` 는 '다른 모듈에서도 부모클래스로 사용하겠다'는 목적 |
+| public      | 모듈 외부    | 상속 불가능                                   |
+| internal    | 모듈 내부    | 일반적인 접근 수준                               |
+| fileprivate | 소스 파일 내부 |                                          |
+| private     | 기능 정의 내부 | 구현한 범위 내에서만 사용 가능                        |
+
+> **모듈**(module) : 단일 코드 단위 배포. 배포할 코드의 묶음 단위.  `import` 를 사용하여 다른 모듈을 이용. 프레임워크, 라이브러리 등
+>
+> **소스파일**  : 하나의 스위프트 소스 코드 파일
+
+
+
+## Delegate
+
+- **delegate** : 어떠한 객체가 해야하는 일을 부분적으로 확장해서 대신 처리한다.
+  - **처리를 명령**하는 객체, 해당 **명령을 수행**하는 객체
+
+```swift
+protocol MessageBoxDelegate: class {
+    func touchButton()
+}
+
+class MessageBox: UIView {
+    
+    weak var delegate: MessageBoxDelegate?
+    var button: UIButton?
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        configure()
+    }
+    
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        
+        configure()
+    }
+    
+    func configure() {
+        button = UIButton(type: .system)
+        if let btn = button {
+            btn.setTitle("SEND", for: .normal)
+            btn.sizeToFit()
+            btn.frame.origin = CGPoint(x: (self.bounds.width - btn.bounds.width) * 0.5,
+                                       y: (self.bounds.height - btn.bounds.height) * 0.5)
+            btn.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
+            self.addSubview(btn)
+        }
+    }
+    
+    @objc func tapButton() {
+        delegate?.touchButton()
+    }
+}
+```
+
+```swift
+import UIKit
+
+class ViewController: UIViewController { // 명령을 수행행행하는 객체
+    
+    var messageBox: MessageBox? //처리를 명령하는 객체
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        messageBox = MessageBox(frame: CGRect(origin: .zero, size: CGSize(width: 300, height: 200)))
+        if let msg = messageBox {
+            msg.frame.origin = CGPoint(x: (UIScreen.main.bounds.width - msg.bounds.width) * 0.5,
+                                       y: (UIScreen.main.bounds.height - msg.bounds.height) * 0.5)
+            
+            msg.backgroundColor = .lightGray
+            msg.delegate = self // MessageBox의 명령을 'DelegateViewController'인 내(self)가 처리하겠다!
+            self.view.addSubview(msg)
+        }
+    }
+}
+
+extension ViewController: MessageBoxDelegate {
+    func touchButton() {
+        print("touchButton")
+    }
+}
+```
+
+
+
+
+
+## GCD, DispatchQueue
+
+**DispatchQueue** : *Task* 를 담아두면 선택된 thread에서 실행
+- Queue의 종류
+  - **Serial** : 한번에 하나씩 차례대로 처리 [직렬]
+  - **Concurrent** : 동시에 여러 작업을 처리  [병렬]
+
+```swift
+let serialQueue = DispatchQueue(label: "serial")
+let conCurrentQueue = DispatchQueue(label: "concurrent", attributes: .concurrent)
+```
+
+- Basic Queue
+
+  - **Main Queue**
+
+    - Main Thread(UI Thread)에서 사용
+    - **Serial Queue**
+    - 모든 UI 처리
+
+  - **Global Queue**
+
+    - **Concurrent Queue**
+
+    - **qos**(Quality of service) : 처리 우선 순위
+
+      userInteractive - userInitiated - default - utility - background - unspecified
+
+    ```swift
+    let globalQueue = DispatchQueue.global(qos: .background)![스크린샷 2018-02-08 오후 4.02.45](/Users/igwang-yong/Desktop/스크린샷 2018-02-08 오후 4.02.45.png)
+    ```
+
+
+- **Sync**, **Async**
+  - **Sync** : 처리가 끝날때까지 기다린다
+  - **Async** : 다른 처리도 한다
+
+```swift
+serialQueue.async {
+    for i in 1...5 {
+        print("Serial Async : \(i) ")
+    }
+}
+print("\"Serial async\"")
+
+serialQueue.sync {
+    for i in 1...5 {
+        print("Serial sync : \(i)")
+    }
+}
+print("\"Serial sync\"")
+```
+
+![스크린샷 2018-02-08 오후 4.02.45](https://ws4.sinaimg.cn/large/006tKfTcgy1fo91w11m90j308009g75a.jpg)
+
+```Swift
+conCurrentQueue.async {
+    for i in 1...5 {
+        print("Concurrent Async : \(i) ")
+    }
+}
+print("\"Concurrent async\"")
+
+conCurrentQueue.sync {
+    for i in 1...5 {
+        print("Concurrent Sync : \(i) ")
+    }
+}
+print("\"Concurrent sync\"")
+```
+
+![스크린샷 2018-02-08 오후 4.01.59](https://ws4.sinaimg.cn/large/006tKfTcgy1fo91w2dxp6j308e094jso.jpg)
+
+
+
+
+
