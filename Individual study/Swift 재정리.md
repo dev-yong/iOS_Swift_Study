@@ -899,13 +899,15 @@ let conCurrentQueue = DispatchQueue(label: "concurrent", attributes: .concurrent
   - **Global Queue**
 
     - **Concurrent Queue**
-
     - **qos**(Quality of service) : 처리 우선 순위
-
-      userInteractive - userInitiated - default - utility - background - unspecified
+      - userInteractive : 즉시 수행. UI 갱신, 사용자 이벤트 처리, 애니메이션
+      - userInitiated : UI 상호작용
+      - default 
+      - utility : 지속적인 작업이 필요한 경우. 
+      - background : 시간에 민감하지 않은 작업들
 
     ```swift
-    let globalQueue = DispatchQueue.global(qos: .background)![스크린샷 2018-02-08 오후 4.02.45](/Users/igwang-yong/Desktop/스크린샷 2018-02-08 오후 4.02.45.png)
+    let globalQueue = DispatchQueue.global(qos: .background)
     ```
 
 
@@ -948,8 +950,4 @@ print("\"Concurrent sync\"")
 ```
 
 ![스크린샷 2018-02-08 오후 4.01.59](https://ws4.sinaimg.cn/large/006tKfTcgy1fo91w2dxp6j308e094jso.jpg)
-
-
-
-
 
